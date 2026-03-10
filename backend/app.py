@@ -58,7 +58,7 @@ def _snapshot_route(snapshot_type: str, fetch_fn):
         except Exception as e:
             logger.error("On-demand fetch failed for %s: %s", snapshot_type, e)
             return jsonify({}), 200
-    return jsonify(data), 200
+    return jsonify({"data": data}), 200
 
 
 @app.get("/llms")
