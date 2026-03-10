@@ -5,7 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-
+idea/*
+idea
 # Distribution / packaging
 .Python
 build/
@@ -205,3 +206,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/trmnl-artificial-intelligence-plugin.iml
+/.idea/vcs.xml
+/.idea/.gitignore
+/plugin/.trmnlp.yml
