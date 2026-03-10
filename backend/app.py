@@ -1,3 +1,4 @@
+import fcntl
 import logging
 import os
 from functools import wraps
@@ -48,9 +49,9 @@ def health():
     return jsonify({"status": "ok"})
 
 
-@app.get("/webhook")
+@app.get("/llms")
 @require_trmnl_ip
-def webhook():
+def get_llms():
     data = db.get_snapshot("llms")
     if data is None:
         # Fetch on-demand if nothing cached yet (first run)
@@ -65,8 +66,26 @@ def webhook():
 
 # ---------- startup ----------
 
+_BOOTSTRAP_LOCK_PATH = "/data/scheduler.lock"
+_bootstrap_lock_fd = None  # held open for process lifetime to keep the lock
+
+
 def _bootstrap():
+    global _bootstrap_lock_fd
     db.init_db()
+
+    # Only one gunicorn worker should run the scheduler and initial fetch.
+    # Grab a non-blocking exclusive file lock; the other workers skip silently.
+    lock_fd = open(_BOOTSTRAP_LOCK_PATH, "w")
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        lock_fd.close()
+        logger.info("Another worker holds the bootstrap lock — skipping scheduler init")
+        return
+
+    _bootstrap_lock_fd = lock_fd  # keep open so the lock is held until process exits
+
     sched.refresh_trmnl_ips()
     sched.refresh_llm_data()
     scheduler = sched.create_scheduler()
