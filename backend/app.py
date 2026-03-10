@@ -49,19 +49,73 @@ def health():
     return jsonify({"status": "ok"})
 
 
+def _snapshot_route(snapshot_type: str, fetch_fn):
+    data = db.get_snapshot(snapshot_type)
+    if data is None:
+        try:
+            data = fetch_fn()
+            db.save_snapshot(snapshot_type, data)
+        except Exception as e:
+            logger.error("On-demand fetch failed for %s: %s", snapshot_type, e)
+            return jsonify({}), 200
+    return jsonify(data), 200
+
+
 @app.get("/llms")
 @require_trmnl_ip
 def get_llms():
-    data = db.get_snapshot("llms")
-    if data is None:
-        # Fetch on-demand if nothing cached yet (first run)
-        try:
-            data = fetcher.fetch_llm_models()
-            db.save_snapshot("llms", data)
-        except Exception as e:
-            logger.error("On-demand fetch failed: %s", e)
-            return jsonify({"error": "Data unavailable, try again later"}), 503
-    return jsonify(data)
+    return _snapshot_route("llms", fetcher.fetch_llms)
+
+
+@app.get("/text-to-image")
+@require_trmnl_ip
+def get_text_to_image():
+    return _snapshot_route("text-to-image", fetcher.fetch_text_to_image)
+
+
+@app.get("/text-to-speech")
+@require_trmnl_ip
+def get_text_to_speech():
+    return _snapshot_route("text-to-speech", fetcher.fetch_text_to_speech)
+
+
+@app.get("/text-to-video")
+@require_trmnl_ip
+def get_text_to_video():
+    return _snapshot_route("text-to-video", fetcher.fetch_text_to_video)
+
+
+@app.get("/image-to-video")
+@require_trmnl_ip
+def get_image_to_video():
+    return _snapshot_route("image-to-video", fetcher.fetch_image_to_video)
+
+
+@app.get("/all")
+@require_trmnl_ip
+def get_all():
+    sources = [
+        ("llms",           fetcher.fetch_llms),
+        ("text-to-image",  fetcher.fetch_text_to_image),
+        ("text-to-speech", fetcher.fetch_text_to_speech),
+        ("text-to-video",  fetcher.fetch_text_to_video),
+        ("image-to-video", fetcher.fetch_image_to_video),
+    ]
+    result = {}
+    errors = {}
+    for snapshot_type, fetch_fn in sources:
+        data = db.get_snapshot(snapshot_type)
+        if data is None:
+            try:
+                data = fetch_fn()
+                db.save_snapshot(snapshot_type, data)
+            except Exception as e:
+                logger.error("On-demand fetch failed for %s: %s", snapshot_type, e)
+                errors[snapshot_type] = "unavailable"
+                continue
+        result[snapshot_type] = data
+
+    return jsonify({"data": result}), 200
 
 
 # ---------- startup ----------
@@ -87,7 +141,7 @@ def _bootstrap():
     _bootstrap_lock_fd = lock_fd  # keep open so the lock is held until process exits
 
     sched.refresh_trmnl_ips()
-    sched.refresh_llm_data()
+    sched.refresh_all()
     scheduler = sched.create_scheduler()
     scheduler.start()
     logger.info("Scheduler started. IP whitelist: %s", ENABLE_IP_WHITELIST)
