@@ -68,17 +68,23 @@ def _transform_llms(models: list[dict]) -> dict:
         if intelligence is None:
             continue
 
+        pricing = m.get("pricing") or {}
         entry = {
             "name": m.get("name", ""),
             "creator": (m.get("model_creator") or {}).get("name", ""),
             "intelligence": round(float(intelligence), 1),
         }
-        coding = _round_or_none(evals.get("artificial_analysis_coding_index"))
-        math = _round_or_none(evals.get("artificial_analysis_math_index"))
-        if coding is not None:
-            entry["coding"] = coding
-        if math is not None:
-            entry["math"] = math
+        for key, val in {
+            "coding":       evals.get("artificial_analysis_coding_index"),
+            "math":         evals.get("artificial_analysis_math_index"),
+            "speed_tps":    m.get("median_output_tokens_per_second"),
+            "ttft_s":       m.get("median_time_to_first_token_seconds"),
+            "price_input":  pricing.get("price_1m_input_tokens"),
+            "price_output": pricing.get("price_1m_output_tokens"),
+        }.items():
+            rounded = _round_or_none(val)
+            if rounded is not None:
+                entry[key] = rounded
 
         parsed.append(entry)
 
@@ -86,8 +92,22 @@ def _transform_llms(models: list[dict]) -> dict:
     for i, m in enumerate(parsed, 1):
         m["rank"] = i
 
+    fastest = sorted(
+        [m for m in parsed if "speed_tps" in m],
+        key=lambda x: x["speed_tps"],
+        reverse=True,
+    )[:5]
+
+    best_value = sorted(
+        [m for m in parsed if m.get("price_output", 0) > 0],
+        key=lambda x: x["intelligence"] / x["price_output"],
+        reverse=True,
+    )[:5]
+
     return {
         "models": parsed[:10],
+        "fastest": fastest,
+        "best_value": best_value,
         "total_models": len(parsed),
     }
 

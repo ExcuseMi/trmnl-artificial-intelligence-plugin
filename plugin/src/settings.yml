@@ -1,15 +1,13 @@
-#
-# Changes to this file will be overwritten by `trmnlp pull`.
-#
-# Docs: https://help.trmnl.com/en/articles/10542599-importing-and-exporting-private-plugins#h_581fb988f0
-#
 ---
 strategy: polling
 no_screen_padding: 'no'
 dark_mode: 'no'
 static_data: ''
 polling_verb: get
-polling_url: ''
+polling_url: https://trmnl.bettens.dev/artificial-intelligence/llms
 polling_headers: ''
-name: My Plugin
+polling_body: ''
+id: 258521
+name: AI Leaderboard
+author_bio: 'Data provided by <a href="https://artificialanalysis.ai/">Artificial Analysis</a>'
 refresh_interval: 1440

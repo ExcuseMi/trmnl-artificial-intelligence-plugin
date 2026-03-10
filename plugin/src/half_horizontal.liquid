@@ -1,1 +1,58 @@
-half horizontal!
+<div class="layout layout--stretch gap--space-between">
+  <div class="flex flex--col" data-overflow="true">
+    <div class="grid grid--cols-5 gap--small">
+      <div class="item col--span-1">
+        <div class="content">
+          <span class="label label--small">#</span>
+        </div>
+      </div>
+      <div class="item col--span-2">
+        <div class="content">
+          <span class="label label--small">Model</span>
+        </div>
+      </div>
+      <div class="item col--span-1">
+        <div class="content">
+          <span class="label label--small">Intel.</span>
+        </div>
+      </div>
+      <div class="item col--span-1">
+        <div class="content">
+          <span class="label label--small">Code</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    {% for model in data.top_models limit: 5 %}
+    <div class="grid grid--cols-5 gap--small">
+      <div class="item col--span-1">
+        <div class="content">
+          <span class="value value--small value--tnums">{{ model.rank }}</span>
+        </div>
+      </div>
+      <div class="item col--span-2">
+        <div class="content">
+          <span class="value value--small">{{ model.name | truncate: 16, '' }}</span>
+          <span class="label">{{ model.creator }}</span>
+        </div>
+      </div>
+      <div class="item col--span-1">
+        <div class="content">
+          <span class="value value--small value--tnums">{{ model.intelligence }}</span>
+        </div>
+      </div>
+      <div class="item col--span-1">
+        <div class="content">
+          <span class="value value--small value--tnums">{{ model.coding | default: '—' }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<div class="title_bar">
+  <span class="title">AI Intelligence Leaderboard</span>
+  <span class="instance">{{ data.total_models }} models</span>
+</div>

@@ -1,1 +1,24 @@
-half vertical!
+<div class="layout layout--col gap--space-between">
+  {% for model in data.top_models limit: 7 %}
+  <div class="grid grid--cols-3 gap--small">
+    <div class="item col--span-2">
+      <div class="content">
+        <span class="value value--small">{{ model.rank }}. {{ model.name | truncate: 18, '' }}</span>
+        <span class="label">{{ model.creator }}</span>
+      </div>
+    </div>
+    <div class="item">
+      <div class="content">
+        <span class="value value--small value--tnums">{{ model.intelligence }}</span>
+        <span class="label">intel.</span>
+      </div>
+    </div>
+  </div>
+  {% unless forloop.last %}<div class="divider"></div>{% endunless %}
+  {% endfor %}
+</div>
+
+<div class="title_bar">
+  <span class="title">AI Intelligence Leaderboard</span>
+  <span class="instance">{{ data.total_models }} models</span>
+</div>

@@ -1,1 +1,31 @@
-quadrant!
+<div class="layout layout--col gap--space-between">
+  <div class="item">
+    <div class="content">
+      <span class="value value--xlarge value--tnums">{{ data.top_models[0].intelligence }}</span>
+      <span class="label">#1 Intelligence</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="item">
+    <div class="content">
+      <span class="value value--small">{{ data.top_models[0].name }}</span>
+      <span class="label">{{ data.top_models[0].creator }}</span>
+    </div>
+  </div>
+
+  {% if data.top_models[0].coding %}
+  <div class="item">
+    <div class="content">
+      <span class="value value--small value--tnums">{{ data.top_models[0].coding }}</span>
+      <span class="label">Coding index</span>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="title_bar">
+  <span class="title">AI #1</span>
+  <span class="instance">of {{ data.total_models }}</span>
+</div>

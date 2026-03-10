@@ -1,1 +1,74 @@
-full!
+<div class="layout layout--col gap--space-between">
+  <div class="grid gap">
+    <div class="item col--span-2">
+      <div class="content">
+        <span class="value value--xlarge value--tnums">{{ data.top_models[0].intelligence }}</span>
+        <span class="label">
+          #1 · {{ data.top_models[0].name }} by {{ data.top_models[0].creator }}
+        </span>
+      </div>
+    </div>
+    <div class="item">
+      <div class="content">
+        <span class="value value--tnums">{{ data.total_models }}</span>
+        <span class="label">Models ranked</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <script src="https://trmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
+  <script src="https://trmnl.com/js/highcharts/12.3.0/pattern-fill.js"></script>
+
+  <div id="llm-chart" class="w--full grow"></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var categories = [{% for model in data.top_models %}"{{ model.name | truncate: 14, '' }}"{% unless forloop.last %},{% endunless %}{% endfor %}];
+      var intelligence = [{% for model in data.top_models %}{{ model.intelligence }}{% unless forloop.last %},{% endunless %}{% endfor %}];
+      var coding = [{% for model in data.top_models %}{{ model.coding | default: 'null' }}{% unless forloop.last %},{% endunless %}{% endfor %}];
+
+      Highcharts.chart("llm-chart", {
+        chart: { type: "column", animation: false, spacing: [5, 0, 5, 0] },
+        title: { text: null },
+        xAxis: {
+          categories: categories,
+          labels: { style: { fontSize: "14px", color: "#000" }, rotation: -35 },
+          lineWidth: 0,
+          tickWidth: 0,
+          gridLineWidth: 0,
+        },
+        yAxis: {
+          min: 0, max: 100,
+          title: { text: null },
+          labels: { style: { fontSize: "14px", color: "#000" } },
+          gridLineDashStyle: "shortdot",
+          gridLineColor: "#000",
+          tickAmount: 5,
+        },
+        plotOptions: {
+          series: {
+            animation: false,
+            enableMouseTracking: false,
+            states: { hover: { enabled: false } },
+            pointPadding: 0.05,
+            groupPadding: 0.1,
+          },
+        },
+        series: [
+          { name: "Intelligence", data: intelligence, color: "#000000" },
+          { name: "Coding", data: coding, color: { pattern: { image: "https://trmnl.com/images/grayscale/gray-5.png", width: 12, height: 12 } } },
+        ],
+        tooltip: { enabled: false },
+        legend: { enabled: false },
+        credits: { enabled: false },
+      });
+    });
+  </script>
+</div>
+
+<div class="title_bar">
+  <span class="title">AI Intelligence Leaderboard</span>
+  <span class="instance">Top {{ data.top_models | size }} of {{ data.total_models }}</span>
+</div>
