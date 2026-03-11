@@ -12,17 +12,18 @@
   <div class="item {{ _emphasis }}">
     <div class="meta"><span class="index">{{ model.rank }}</span></div>
     <div class="content w--full">
-      <div class="grid grid--cols-3 gap--xsmall w--full">
+      <div class="grid grid--cols-3 md:portrait:grid--cols-2 gap--xsmall w--full">
         <div class="col--span-2 flex flex--col justify--center">
           <div class="value value--small text--left w--full" data-clamp="2">{{ model.name }}</div>
         </div>
-        <div class="flex flex--col justify--center text--center gap--xsmall">
+        <div class="flex flex--col justify--center text--center gap--xsmall 
+          md:portrait:hidden lg:portrait:flex">
           {% if model.elo %}
             <span class="value value--small value--tnums">{{ model.elo }}</span>
             <span class="label">elo</span>
           {% else %}
             <span class="value value--small value--tnums">{{ model.intelligence }}</span>
-            <span class="label">{% if model.speed_tps %}{{ model.speed_tps }} tok/s{% else %}intel.{% endif %}</span>
+            <span class="label">{% if model.speed_tps %}{{ model.speed_tps }} token/s{% else %}intel.{% endif %}</span>
           {% endif %}
         </div>
       </div>
