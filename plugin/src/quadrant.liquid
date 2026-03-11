@@ -1,31 +1,38 @@
-<div class="layout layout--col gap--space-between">
-  <div class="item">
+{% assign top = data.models[0] %}
+
+<div class="layout layout--stretch layout--col">
+    <div class="item">
     <div class="content">
-      <span class="value value--xlarge value--tnums">{{ data.top_models[0].intelligence }}</span>
-      <span class="label">#1 Intelligence</span>
+      <span class="value md:value--small lg:value--large" data-clamp="2">{{ top.name }}</span>
+      <span class="label label--gray lg:label--large">{{ top.creator }}</span>
     </div>
   </div>
-
-  <div class="divider"></div>
-
-  <div class="item">
-    <div class="content">
-      <span class="value value--small">{{ data.top_models[0].name }}</span>
-      <span class="label">{{ data.top_models[0].creator }}</span>
+  <div class="flex flex--row md:portrait:flex--col">
+    <div class="item stretch">
+      <div class="meta"></div>
+      <div class="content">
+        {% if top.elo %}
+        <span class="value md:value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.elo }}</span>
+        <span class="label lg:label--large">#1 ELO</span>
+        {% else %}
+        <span class="value value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.intelligence }}</span>
+        <span class="label lg:label--large">#1 Intelligence</span>
+        {% endif %}
+      </div>
     </div>
+    {% if top.coding %}
+    <div class="item">
+      <div class="meta"></div>
+
+      <div class="content">
+        <span class="value value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.coding }}</span>
+        <span class="label">Coding index</span>
+      </div>
+    </div>
+
+    {% endif %}
   </div>
 
-  {% if data.top_models[0].coding %}
-  <div class="item">
-    <div class="content">
-      <span class="value value--small value--tnums">{{ data.top_models[0].coding }}</span>
-      <span class="label">Coding index</span>
-    </div>
-  </div>
-  {% endif %}
+
 </div>
-
-<div class="title_bar">
-  <span class="title">AI #1</span>
-  <span class="instance">of {{ data.total_models }}</span>
-</div>
+{% render "title_bar", trmnl: trmnl, data: data, icon: icon %}

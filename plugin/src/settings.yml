@@ -4,10 +4,37 @@ no_screen_padding: 'no'
 dark_mode: 'no'
 static_data: ''
 polling_verb: get
-polling_url: https://trmnl.bettens.dev/artificial-intelligence/llms
+polling_url: 'https://trmnl.bettens.dev/artificial-intelligence/{{ trmnl.plugin_settings.custom_fields_values.view | default: "llms" }}'
 polling_headers: ''
 polling_body: ''
 id: 258521
+custom_fields:
+- keyname: author_bio
+  field_type: author_bio
+  name: About This Plugin
+  category: 
+  description: |
+    Live AI model leaderboards powered by <a href="https://artificialanalysis.ai/">Artificial Analysis</a>.<br /><br />
+    <strong>Available leaderboards</strong><br />
+    · <strong>LLMs</strong> — intelligence, coding &amp; math benchmarks<br />
+    · <strong>Text to Image</strong> — image generation ELO ratings<br />
+    · <strong>Text to Speech</strong> — voice synthesis ELO ratings<br />
+    · <strong>Text to Video</strong> — video generation ELO ratings<br />
+    · <strong>Image to Video</strong> — image animation ELO ratings<br /><br />
+    Data refreshed daily. Attribution: <a href="https://artificialanalysis.ai/">artificialanalysis.ai</a>
+  github_url: https://github.com/ExcuseMi/trmnl-artificial-intelligence-plugin
+  learn_more_url: https://artificialanalysis.ai/
+  help_text: Data by Artificial Analysis<br />TRMNL X Ready
+- keyname: view
+  field_type: select
+  name: Leaderboard
+  description: Which AI model leaderboard to display.
+  options:
+  - LLMs: llms
+  - Text to Image: text-to-image
+  - Text to Speech: text-to-speech
+  - Text to Video: text-to-video
+  - Image to Video: image-to-video
+  default: llms
 name: AI Leaderboard
-author_bio: 'Data provided by <a href="https://artificialanalysis.ai/">Artificial Analysis</a>'
 refresh_interval: 1440

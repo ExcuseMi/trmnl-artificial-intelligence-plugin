@@ -1,74 +1,127 @@
-<div class="layout layout--col gap--space-between">
-  <div class="grid gap">
-    <div class="item col--span-2">
+{% assign top = data.models[0] %}
+
+<div class="layout  layout--col gap--space-between w--full">
+  <div class="flex flex--row flex--stretch-x mb--5 w--full">
+    <div class="item stretch bg--black text--white md:portrait:hidden rounded p--2">
       <div class="content">
-        <span class="value value--xlarge value--tnums">{{ data.top_models[0].intelligence }}</span>
-        <span class="label">
-          #1 · {{ data.top_models[0].name }} by {{ data.top_models[0].creator }}
-        </span>
+        <div class="value">{{top.name | escape }}</div>
+    </div>
+
+    </div>
+    <div class="item no-shrink">
+      <div class="meta"></div>
+      <div class="content">
+        {% if top.elo %}
+          <span class="value value--tnums">{{ top.elo }}</span>
+          <span class="label">#1 ELO</span>
+        {% else %}
+          <span class="value value--tnums">{{ top.intelligence }}</span>
+          <span class="label">#1 Intelligence</span>
+        {% endif %}
       </div>
     </div>
+    {% unless top.elo %}
+    <div class="item no-shrink">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--tnums">{{ top.speed_tps }}</span>
+        <span class="label">tok/s</span>
+      </div>
+    </div>
+    <div class="item no-shrink">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--tnums">${{ top.price_output }}</span>
+        <span class="label">$/M out</span>
+      </div>
+    </div>
+    {% else %}
     <div class="item">
+      <div class="meta"></div>
       <div class="content">
         <span class="value value--tnums">{{ data.total_models }}</span>
-        <span class="label">Models ranked</span>
+        <span class="label">{{ view_label }} ranked</span>
       </div>
     </div>
+    {% endunless %}
   </div>
-
-  <div class="divider"></div>
 
   <script src="https://trmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
   <script src="https://trmnl.com/js/highcharts/12.3.0/pattern-fill.js"></script>
 
-  <div id="llm-chart" class="w--full grow"></div>
+  <div id="ai-chart-md" class="w--full grow h--min-0 lg:hidden"></div>
+  <div id="ai-chart-lg" class="w--full grow h--min-0 md:hidden lg:block"></div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      var categories = [{% for model in data.top_models %}"{{ model.name | truncate: 14, '' }}"{% unless forloop.last %},{% endunless %}{% endfor %}];
-      var intelligence = [{% for model in data.top_models %}{{ model.intelligence }}{% unless forloop.last %},{% endunless %}{% endfor %}];
-      var coding = [{% for model in data.top_models %}{{ model.coding | default: 'null' }}{% unless forloop.last %},{% endunless %}{% endfor %}];
+    var allCategories = [{% for model in data.models %}"{{ model.name }}"{% unless forloop.last %},{% endunless %}{% endfor %}];
+    var allIntelligence = [{% for model in data.models %}{{ model.intelligence }}{% unless forloop.last %},{% endunless %}{% endfor %}];
+    {% unless top.elo %}
+    var allCoding = [{% for model in data.models %}{{ model.coding | default: 'null' }}{% unless forloop.last %},{% endunless %}{% endfor %}];
+    {% endunless %}
 
-      Highcharts.chart("llm-chart", {
-        chart: { type: "column", animation: false, spacing: [5, 0, 5, 0] },
+    function makeChart(id, limit, nameFontSize, showCreator) {
+      var categories = allCategories.slice(0, limit);
+      var creatorCategories = [{% for model in data.models %}"{{ model.name }}|{{ model.creator }}"{% unless forloop.last %},{% endunless %}{% endfor %}].slice(0, limit);
+
+      {% if top.elo %}
+        var series = [{
+          name: "ELO",
+          data: [{% for model in data.models %}{{ model.elo }}{% unless forloop.last %},{% endunless %}{% endfor %}].slice(0, limit),
+          color: "#444444"
+        }];
+      {% else %}
+        var series = [
+          { name: "Intelligence", data: allIntelligence.slice(0, limit), color: "#444444" },
+          { name: "Coding", data: allCoding.slice(0, limit), color: { pattern: { image: "https://trmnl.com/images/grayscale/gray-5.png", width: 12, height: 12 } } },
+        ];
+      {% endif %}
+
+      Highcharts.chart(id, {
+        chart: { type: "bar", animation: false, spacing: [0, 0, 0, 0], style: { fontFamily: "var(--value-font-family)" } },
         title: { text: null },
         xAxis: {
-          categories: categories,
-          labels: { style: { fontSize: "14px", color: "#000" }, rotation: -35 },
-          lineWidth: 0,
-          tickWidth: 0,
-          gridLineWidth: 0,
+          categories: showCreator ? creatorCategories : categories,
+          reversed: true,
+          labels: {
+            step: 1,
+            formatter: function() {
+              var weight = this.pos === 0 ? "bold" : "normal";
+              if (showCreator) {
+                var parts = this.value.split("|");
+                var name = parts[0].length > 36 ? parts[0].substring(0, 35) + "…" : parts[0];
+                return '<span style="font-size:' + nameFontSize + ';color:#000;font-weight:' + weight + ';">' + name + '</span>'
+                     + '<br/><span style="font-size:18px;color:#888;font-weight:' + weight + ';">' + (parts[1] || "") + '</span>';
+              }
+              var name = this.value.length > 26 ? this.value.substring(0, 25) + "…" : this.value;
+              return '<span style="font-size:' + nameFontSize + ';color:#000;font-weight:' + weight + ';">' + name + '</span>';
+            },
+          },
+          lineWidth: 0, tickWidth: 0, gridLineWidth: 0,
         },
         yAxis: {
-          min: 0, max: 100,
           title: { text: null },
-          labels: { style: { fontSize: "14px", color: "#000" } },
-          gridLineDashStyle: "shortdot",
-          gridLineColor: "#000",
-          tickAmount: 5,
+          labels: { style: { fontSize: showCreator ? "16px" : "13px", color: "#000" } },
+          gridLineDashStyle: "shortdot", gridLineColor: "#000", tickAmount: 4,
         },
+        legend: { enabled: series.length > 1, align: "left", verticalAlign: "bottom", itemStyle: { fontSize: "11px", fontWeight: "normal", color: "#000" }, symbolRadius: 0 },
         plotOptions: {
           series: {
-            animation: false,
-            enableMouseTracking: false,
+            animation: false, enableMouseTracking: false,
             states: { hover: { enabled: false } },
-            pointPadding: 0.05,
-            groupPadding: 0.1,
+            pointPadding: 0.02, groupPadding: 0.05,
           },
         },
-        series: [
-          { name: "Intelligence", data: intelligence, color: "#000000" },
-          { name: "Coding", data: coding, color: { pattern: { image: "https://trmnl.com/images/grayscale/gray-5.png", width: 12, height: 12 } } },
-        ],
+        series: series,
         tooltip: { enabled: false },
-        legend: { enabled: false },
         credits: { enabled: false },
       });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      makeChart("ai-chart-md", 5,  "20px", false);
+      makeChart("ai-chart-lg", 10, "26px", false);
     });
   </script>
 </div>
 
-<div class="title_bar">
-  <span class="title">AI Intelligence Leaderboard</span>
-  <span class="instance">Top {{ data.top_models | size }} of {{ data.total_models }}</span>
-</div>
+{% render "title_bar", trmnl: trmnl, data: data, icon: icon %}

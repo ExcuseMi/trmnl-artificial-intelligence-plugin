@@ -1,58 +1,58 @@
+{% assign top = data.models[0] %}
+
 <div class="layout layout--stretch gap--space-between">
   <div class="flex flex--col" data-overflow="true">
-    <div class="grid grid--cols-5 gap--small">
-      <div class="item col--span-1">
-        <div class="content">
-          <span class="label label--small">#</span>
-        </div>
+    <div class="item grid grid--cols-8 gap--small">
+      <div class="col--span-5 md:portrait:col--span-7">
+        <span class="label">Model</span>
       </div>
-      <div class="item col--span-2">
-        <div class="content">
-          <span class="label label--small">Model</span>
-        </div>
+      {% unless top.elo %}
+      <div class="col--span-1 md:portrait:hidden">
+        <span class="label">tok/s</span>
       </div>
-      <div class="item col--span-1">
-        <div class="content">
-          <span class="label label--small">Intel.</span>
-        </div>
+      <div class="col--span-1 md:portrait:hidden">
+        <span class="label">$/M out</span>
       </div>
-      <div class="item col--span-1">
-        <div class="content">
-          <span class="label label--small">Code</span>
-        </div>
+      {% endunless %}
+      <div class="col--span-1">
+        {% if top.elo %}<span class="label">ELO</span>{% else %}<span class="label">Intel.</span>{% endif %}
       </div>
     </div>
 
     <div class="divider"></div>
 
-    {% for model in data.top_models limit: 5 %}
-    <div class="grid grid--cols-5 gap--small">
-      <div class="item col--span-1">
+    {% for model in data.models %}
+    <div class="item grid grid--cols-8 gap--small">
+      <div class="col--span-5 md:portrait:col--span-7">
         <div class="content">
-          <span class="value value--small value--tnums">{{ model.rank }}</span>
+          <span class="value value--small" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ model.rank }}. {{ model.name }}</span>
+          <span class="label label--gray">{{ model.creator }}</span>
         </div>
       </div>
-      <div class="item col--span-2">
+      {% unless model.elo %}
+      <div class="col--span-1 md:portrait:hidden">
         <div class="content">
-          <span class="value value--small">{{ model.name | truncate: 16, '' }}</span>
-          <span class="label">{{ model.creator }}</span>
+          <span class="value value--small value--tnums">{{ model.speed_tps | default: '—' }}</span>
         </div>
       </div>
-      <div class="item col--span-1">
+      <div class="col--span-1 md:portrait:hidden">
         <div class="content">
-          <span class="value value--small value--tnums">{{ model.intelligence }}</span>
+          <span class="value value--small value--tnums">{% if model.price_output %}${{ model.price_output }}{% else %}—{% endif %}</span>
         </div>
       </div>
-      <div class="item col--span-1">
+      {% endunless %}
+      <div class="col--span-1">
         <div class="content">
-          <span class="value value--small value--tnums">{{ model.coding | default: '—' }}</span>
+          {% if model.elo %}
+            <span class="value value--small value--tnums">{{ model.elo }}</span>
+          {% else %}
+            <span class="value value--small value--tnums">{{ model.intelligence }}</span>
+          {% endif %}
         </div>
       </div>
     </div>
     {% endfor %}
   </div>
 </div>
-<div class="title_bar">
-  <span class="title">AI Intelligence Leaderboard</span>
-  <span class="instance">{{ data.total_models }} models</span>
-</div>
+
+{% render "title_bar", trmnl: trmnl, data: data, icon: icon %}

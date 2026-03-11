@@ -1,24 +1,30 @@
-<div class="layout layout--col gap--space-between">
-  {% for model in data.top_models limit: 7 %}
-  <div class="grid grid--cols-3 gap--small">
+{% assign top = data.models[0] %}
+
+<div class="layout layout--stretch gap--space-between">
+  <div class="flex flex--col" data-overflow="true">
+    {% for model in data.models %}
+  <div class="item grid grid--cols-3 gap--small">
     <div class="item col--span-2">
       <div class="content">
-        <span class="value value--small">{{ model.rank }}. {{ model.name | truncate: 18, '' }}</span>
-        <span class="label">{{ model.creator }}</span>
+        <span class="value value--small" style="flex: 1 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ model.rank }}. {{ model.name }}</span>
+        <span class="label label--gray">{{ model.creator }}</span>
       </div>
     </div>
     <div class="item">
       <div class="content">
-        <span class="value value--small value--tnums">{{ model.intelligence }}</span>
-        <span class="label">intel.</span>
+        {% if model.elo %}
+          <span class="value value--small value--tnums">{{ model.elo }}</span>
+          <span class="label">elo</span>
+        {% else %}
+          <span class="value value--small value--tnums">{{ model.intelligence }}</span>
+          <span class="label">{% if model.speed_tps %}{{ model.speed_tps }} tok/s{% else %}intel.{% endif %}</span>
+        {% endif %}
       </div>
     </div>
   </div>
   {% unless forloop.last %}<div class="divider"></div>{% endunless %}
   {% endfor %}
+  </div>
 </div>
 
-<div class="title_bar">
-  <span class="title">AI Intelligence Leaderboard</span>
-  <span class="instance">{{ data.total_models }} models</span>
-</div>
+{% render "title_bar", trmnl: trmnl, data: data, icon: icon %}
