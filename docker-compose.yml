@@ -1,5 +1,6 @@
 services:
   backend:
+    container_name: trmnl-artificial-intelligence
     build:
       context: ./backend
       dockerfile: Dockerfile
