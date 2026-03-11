@@ -66,8 +66,8 @@ def get_trmnl_ips() -> set[str] | None:
         row = conn.execute("SELECT updated_at, ips FROM trmnl_ips WHERE id = 1").fetchone()
     if not row:
         return None
-    updated = datetime.fromisoformat(row["updated_at"]).date()
-    if updated < date.today():
+    updated = datetime.fromisoformat(row["updated_at"])
+    if (datetime.utcnow() - updated).total_seconds() > 86400:
         return None  # stale
     return set(json.loads(row["ips"]))
 

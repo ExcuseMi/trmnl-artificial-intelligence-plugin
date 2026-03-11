@@ -32,7 +32,10 @@ def require_trmnl_ip(f):
         client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
         client_ip = client_ip.split(",")[0].strip()
 
-        allowed = db.get_trmnl_ips() or set()
+        allowed = db.get_trmnl_ips()
+        if allowed is None:
+            sched.refresh_trmnl_ips()
+            allowed = db.get_trmnl_ips() or set()
         allowed |= LOCALHOST_IPS
 
         if client_ip not in allowed:
@@ -128,7 +131,7 @@ def _bootstrap():
     global _bootstrap_lock_fd
     db.init_db()
 
-    # Only one gunicorn worker should run the scheduler and initial fetch.
+    # Only one gunicorn worker should run the scheduler.
     # Grab a non-blocking exclusive file lock; the other workers skip silently.
     lock_fd = open(_BOOTSTRAP_LOCK_PATH, "w")
     try:
@@ -140,8 +143,6 @@ def _bootstrap():
 
     _bootstrap_lock_fd = lock_fd  # keep open so the lock is held until process exits
 
-    sched.refresh_trmnl_ips()
-    sched.refresh_all()
     scheduler = sched.create_scheduler()
     scheduler.start()
     logger.info("Scheduler started. IP whitelist: %s", ENABLE_IP_WHITELIST)
