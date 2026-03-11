@@ -68,8 +68,15 @@ def get_trmnl_ips() -> set[str] | None:
         return None
     updated = datetime.fromisoformat(row["updated_at"])
     if (datetime.utcnow() - updated).total_seconds() > 86400:
-        return None  # stale
+        return None  # stale — caller should refresh
     return set(json.loads(row["ips"]))
+
+
+def get_trmnl_ips_any() -> set[str] | None:
+    """Return cached IPs regardless of staleness — used as fallback when a refresh fails."""
+    with _conn() as conn:
+        row = conn.execute("SELECT ips FROM trmnl_ips WHERE id = 1").fetchone()
+    return set(json.loads(row["ips"])) if row else None
 
 
 def save_trmnl_ips(ips: list[str]):

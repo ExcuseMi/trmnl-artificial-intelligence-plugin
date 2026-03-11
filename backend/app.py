@@ -23,23 +23,35 @@ LOCALHOST_IPS = {"127.0.0.1", "::1"}
 
 # ---------- IP whitelist ----------
 
+def _client_ip() -> str:
+    for header in ("CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For"):
+        val = request.headers.get(header)
+        if val:
+            return val.split(",")[0].strip()
+    return request.remote_addr
+
+
 def require_trmnl_ip(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if not ENABLE_IP_WHITELIST:
             return f(*args, **kwargs)
 
-        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
-        client_ip = client_ip.split(",")[0].strip()
+        ip = _client_ip()
 
         allowed = db.get_trmnl_ips()
         if allowed is None:
             sched.refresh_trmnl_ips()
-            allowed = db.get_trmnl_ips() or set()
-        allowed |= LOCALHOST_IPS
+            # Fresh fetch may have succeeded; fall back to stale IPs rather than empty set
+            allowed = db.get_trmnl_ips() or db.get_trmnl_ips_any()
+        if allowed is None:
+            # No IPs in DB at all — fail open so TRMNL can still reach us
+            logger.warning("No TRMNL IPs available, allowing request from %s", ip)
+            return f(*args, **kwargs)
 
-        if client_ip not in allowed:
-            logger.warning("Blocked request from %s", client_ip)
+        allowed |= LOCALHOST_IPS
+        if ip not in allowed:
+            logger.warning("Blocked request from %s", ip)
             return jsonify({"error": "Forbidden"}), 403
         return f(*args, **kwargs)
     return wrapper
