@@ -1,58 +1,56 @@
-{% assign top = data.models[0] %}
+{% assign view = 2 %}
+
+{% if _leaderboard == null %}
+  {% render "no_data", trmnl: trmnl, icon: icon %}
+{% else %}
+{% assign top = _leaderboard.models[0] %}
 
 <div class="layout layout--stretch gap--space-between">
   <div class="flex flex--col" data-overflow="true">
-    <div class="item grid grid--cols-8 gap--small">
-      <div class="col--span-5 md:portrait:col--span-7">
-        <span class="label">Model</span>
-      </div>
-      {% unless top.elo %}
-      <div class="col--span-1 md:portrait:hidden">
-        <span class="label">tok/s</span>
-      </div>
-      <div class="col--span-1 md:portrait:hidden">
-        <span class="label">$/M out</span>
-      </div>
-      {% endunless %}
-      <div class="col--span-1">
-        {% if top.elo %}<span class="label">ELO</span>{% else %}<span class="label">Intel.</span>{% endif %}
+
+    <div class="item w--full">
+      <div class="meta"></div>
+      <div class="content w--full">
+        <div class="grid grid--cols-8 gap--small w--full">
+          <div class="col--span-6 lg:col--span-5"><span class="label">Model</span></div>
+          {% unless top.elo %}
+          <div class="col--span-1 md:portrait:hidden text--center"><span class="label">tok/s</span></div>
+          <div class="col--span-1 md:hidden lg:block text--center"><span class="label">Coding</span></div>
+          {% endunless %}
+          <div class="{% if top.elo %}col--span-2{% else %}col--span-1{% endif %} md:portrait:col--span-2 text--center"><span class="label">{% if top.elo %}ELO{% else %}Intel.{% endif %}</span></div>
+        </div>
       </div>
     </div>
 
     <div class="divider"></div>
 
-    {% for model in data.models %}
-    <div class="item grid grid--cols-8 gap--small">
-      <div class="col--span-5 md:portrait:col--span-7">
-        <div class="content">
-          <span class="value value--small" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ model.rank }}. {{ model.name }}</span>
-          <span class="label label--gray">{{ model.creator }}</span>
-        </div>
-      </div>
-      {% unless model.elo %}
-      <div class="col--span-1 md:portrait:hidden">
-        <div class="content">
-          <span class="value value--small value--tnums">{{ model.speed_tps | default: '—' }}</span>
-        </div>
-      </div>
-      <div class="col--span-1 md:portrait:hidden">
-        <div class="content">
-          <span class="value value--small value--tnums">{% if model.price_output %}${{ model.price_output }}{% else %}—{% endif %}</span>
-        </div>
-      </div>
-      {% endunless %}
-      <div class="col--span-1">
-        <div class="content">
-          {% if model.elo %}
-            <span class="value value--small value--tnums">{{ model.elo }}</span>
-          {% else %}
-            <span class="value value--small value--tnums">{{ model.intelligence }}</span>
-          {% endif %}
+    {% for model in _leaderboard.models %}
+    {% if forloop.first %}{% assign _emphasis = "item--emphasis-2" %}{% else %}{% assign _emphasis = "item--emphasis-1" %}{% endif %}
+    <div class="item {{ _emphasis }} w--full">
+      <div class="meta"><span class="index">{{ model.rank }}</span></div>
+      <div class="content w--full">
+        <div class="grid grid--cols-8 gap--small w--full">
+          <div class="col--span-6 lg:col--span-5">
+            <span class="value value--small" data-clamp="2">{{ model.name }}</span>
+          </div>
+          {% unless model.elo %}
+          <div class="col--span-1 md:portrait:hidden text--center">
+            <span class="value value--small value--tnums">{{ model.speed_tps | default: '—' }}</span>
+          </div>
+          <div class="col--span-1 md:hidden lg:block text--center">
+            <span class="value value--small value--tnums">{{ model.coding | default: '—' }}</span>
+          </div>
+          {% endunless %}
+          <div class="{% if model.elo %}col--span-2{% else %}col--span-1{% endif %} md:portrait:col--span-2 text--center">
+            <span class="value value--small value--tnums">{% if model.elo %}{{ model.elo }}{% else %}{{ model.intelligence }}{% endif %}</span>
+          </div>
         </div>
       </div>
     </div>
     {% endfor %}
+
   </div>
 </div>
 
-{% render "title_bar", trmnl: trmnl, data: data, icon: icon %}
+{% render "title_bar", trmnl: trmnl, data: data, icon: icon, view:view, _view_label:_view_label %}
+{% endif %}

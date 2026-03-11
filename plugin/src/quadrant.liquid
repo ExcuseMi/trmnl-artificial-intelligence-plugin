@@ -1,38 +1,44 @@
-{% assign top = data.models[0] %}
+{% assign view = 4 %}
+{% if _leaderboard == null %}
+  {% render "no_data", trmnl: trmnl, icon: icon %}
+{% else %}
+{% assign top = _leaderboard.models[0] %}
 
 <div class="layout layout--stretch layout--col">
+  <div class="flex flex--col">
     <div class="item">
-    <div class="content">
-      <span class="value md:value--small lg:value--large" data-clamp="2">{{ top.name }}</span>
-      <span class="label label--gray lg:label--large">{{ top.creator }}</span>
-    </div>
-  </div>
-  <div class="flex flex--row md:portrait:flex--col">
-    <div class="item stretch">
-      <div class="meta"></div>
       <div class="content">
-        {% if top.elo %}
-        <span class="value md:value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.elo }}</span>
-        <span class="label lg:label--large">#1 ELO</span>
-        {% else %}
-        <span class="value value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.intelligence }}</span>
-        <span class="label lg:label--large">#1 Intelligence</span>
-        {% endif %}
+        <span class="value lg:value--large" data-value-fit="true" data-clamp="2">{{ top.name }}</span>
+        <span class="label label--gray lg:label--large">{{ top.creator }}</span>
       </div>
     </div>
-    {% if top.coding %}
-    <div class="item">
-      <div class="meta"></div>
-
-      <div class="content">
-        <span class="value value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.coding }}</span>
-        <span class="label">Coding index</span>
+    <div class="flex flex--row md:portrait:flex--col w--full">
+      <div class="item stretch">
+        <div class="meta"></div>
+        <div class="content">
+          {% if top.elo %}
+          <span class="value md:value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.elo }}</span>
+          <span class="label lg:label--large">#1 ELO</span>
+          {% else %}
+          <span class="value value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.intelligence }}</span>
+          <span class="label lg:label--large">#1 Intelligence</span>
+          {% endif %}
+        </div>
       </div>
+      {% if top.coding %}
+      <div class="item">
+        <div class="meta"></div>
+
+        <div class="content">
+          <span class="value value--base md:portrait:value--xlarge lg:value--xlarge value--tnums">{{ top.coding }}</span>
+          <span class="label">Coding index</span>
+        </div>
+      </div>
+
+      {% endif %}
     </div>
-
-    {% endif %}
   </div>
-
 
 </div>
-{% render "title_bar", trmnl: trmnl, data: data, icon: icon %}
+{% render "title_bar", trmnl: trmnl, data: data, icon: icon, view:view, _view_label:_view_label %}
+{% endif %}

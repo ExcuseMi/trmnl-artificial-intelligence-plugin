@@ -1,24 +1,30 @@
-{% assign top = data.models[0] %}
+{% assign view = 3 %}
+
+{% if _leaderboard == null %}
+  {% render "no_data", trmnl: trmnl, icon: icon %}
+{% else %}
+{% assign top = _leaderboard.models[0] %}
 
 <div class="layout layout--stretch gap--space-between">
   <div class="flex flex--col" data-overflow="true">
-    {% for model in data.models %}
-  <div class="item grid grid--cols-3 gap--small">
-    <div class="item col--span-2">
-      <div class="content">
-        <span class="value value--small" style="flex: 1 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ model.rank }}. {{ model.name }}</span>
-        <span class="label label--gray">{{ model.creator }}</span>
-      </div>
-    </div>
-    <div class="item">
-      <div class="content">
-        {% if model.elo %}
-          <span class="value value--small value--tnums">{{ model.elo }}</span>
-          <span class="label">elo</span>
-        {% else %}
-          <span class="value value--small value--tnums">{{ model.intelligence }}</span>
-          <span class="label">{% if model.speed_tps %}{{ model.speed_tps }} tok/s{% else %}intel.{% endif %}</span>
-        {% endif %}
+    {% for model in _leaderboard.models %}
+    {% if forloop.first %}{% assign _emphasis = "item--emphasis-3" %}{% else %}{% assign _emphasis = "item--emphasis-1" %}{% endif %}
+  <div class="item {{ _emphasis }}">
+    <div class="meta"><span class="index">{{ model.rank }}</span></div>
+    <div class="content w--full">
+      <div class="grid grid--cols-3 gap--xsmall w--full">
+        <div class="col--span-2 flex flex--col justify--center">
+          <div class="value value--small text--left w--full" data-clamp="2">{{ model.name }}</div>
+        </div>
+        <div class="flex flex--col justify--center text--center gap--xsmall">
+          {% if model.elo %}
+            <span class="value value--small value--tnums">{{ model.elo }}</span>
+            <span class="label">elo</span>
+          {% else %}
+            <span class="value value--small value--tnums">{{ model.intelligence }}</span>
+            <span class="label">{% if model.speed_tps %}{{ model.speed_tps }} tok/s{% else %}intel.{% endif %}</span>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
@@ -27,4 +33,5 @@
   </div>
 </div>
 
-{% render "title_bar", trmnl: trmnl, data: data, icon: icon %}
+{% render "title_bar", trmnl: trmnl, data: data, icon: icon, view:view, _view_label:_view_label %}
+{% endif %}

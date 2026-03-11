@@ -1,9 +1,30 @@
-    {% capture icon %}
+{% liquid
+  assign _selected = trmnl.plugin_settings.custom_fields_values.view
+  if _selected == null or _selected.size == 0
+    assign _pool_str = ""
+    for _pair in data.labels
+      if forloop.first
+        assign _pool_str = _pair[0]
+      else
+        assign _pool_str = _pool_str | append: "," | append: _pair[0]
+      endif
+    endfor
+    assign _pool = _pool_str | split: ","
+  else
+    assign _pool = _selected
+  endif
+  assign _ns = 'now' | date: "%N" | plus: 0
+  assign _idx = _ns | modulo: _pool.size
+  assign _view = _pool[_idx]
+  assign _view_label = data.labels[_view]
+  assign _leaderboard = data[_view]
+%}
+{% capture icon %}
 <svg class="image image-stroke w--8 h--8" id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250">
   <defs>
     <style>
       .cls-1 {
-        fill: #4378df;
+        fill: #444444;
       }
 
       .cls-1, .cls-2, .cls-3, .cls-4 {
@@ -15,7 +36,7 @@
       }
 
       .cls-2 {
-        fill: #1c369e;
+        fill: #000000;
       }
 
       .cls-3 {
@@ -23,7 +44,7 @@
       }
 
       .cls-4 {
-        fill: #7870f2;
+        fill: #888888;
       }
     </style>
   </defs>
@@ -38,19 +59,25 @@
 </svg>
 {% endcapture %}
 
-{% template title_bar %}
-{% assign _view = trmnl.plugin_settings.custom_fields_values.view | default: "llms" %}
-{% case _view %}
-  {% when "text-to-image" %}{% assign view_label = "Text to Image" %}
-  {% when "text-to-speech" %}{% assign view_label = "Text to Speech" %}
-  {% when "text-to-video" %}{% assign view_label = "Text to Video" %}
-  {% when "image-to-video" %}{% assign view_label = "Image to Video" %}
-  {% else %}{% assign view_label = "LLMs" %}
-{% endcase %}
+{% template no_data %}
+<div class="layout layout--col layout--center gap--space-between">
+  <div class="item">
+    <div class="content">
+      <span class="value">No data yet</span>
+      <span class="label">{{ _view_label }} leaderboard is loading</span>
+    </div>
+  </div>
+</div>
+{% render "title_bar", trmnl: trmnl, icon: icon %}
+{% endtemplate %}
 
+{% template title_bar %}
 <div class="title_bar">
   {{icon}}
-  <span class="title">{{ view_label }}</span>
-  <span class="instance">{{ data.total_models }} models</span>
+
+  <span class="title md:portrait:hidden lg:portrait:block">{{ trmnl.plugin_settings.instance_name | default: "AI Leaderboard" }}</span>
+  <span class="title hidden md:portrait:block lg:portrait:block">{{ _view_label }}</span>
+
+  <span class="instance md:portrait:hidden">{{ _view_label }}</span>
 </div>
 {% endtemplate %}
