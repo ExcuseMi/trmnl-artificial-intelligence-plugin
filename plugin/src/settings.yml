@@ -15,7 +15,7 @@ custom_fields:
   description: |
     Live AI model leaderboards powered by <a href="https://artificialanalysis.ai/">Artificial Analysis</a>.<br /><br />
     <strong>Available leaderboards</strong><br />
-    · <strong>LLMs</strong> — intelligence, coding & math benchmarks<br />
+    · <strong>LLMs</strong> — intelligence & coding benchmarks<br />
     · <strong>Text to Image</strong> — image generation ELO ratings<br />
     · <strong>Text to Speech</strong> — voice synthesis ELO ratings<br />
     · <strong>Text to Video</strong> — video generation ELO ratings<br />
@@ -28,7 +28,7 @@ custom_fields:
 - keyname: view
   field_type: select
   name: Leaderboard
-  description: Which AI model leaderboard to display<br />A random selected on will be shown.<br />If none are selected, a random one will be chosen.
+  description: Which AI model leaderboard to display<br />If multiple are selected, a random one of these will be shown.<br />If none are selected, a random one will be chosen from all options.
   optional: true
   options:
   - LLMs: llms
