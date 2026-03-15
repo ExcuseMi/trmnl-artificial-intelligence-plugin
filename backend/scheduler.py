@@ -13,7 +13,8 @@ _SOURCES = [
     ("text-to-image",  fetcher.fetch_text_to_image),
     ("text-to-speech", fetcher.fetch_text_to_speech),
     ("text-to-video",  fetcher.fetch_text_to_video),
-    ("image-to-video", fetcher.fetch_image_to_video),
+    ("image-to-video",  fetcher.fetch_image_to_video),
+    ("image-editing",   fetcher.fetch_image_editing),
 ]
 
 
@@ -45,5 +46,5 @@ def refresh_trmnl_ips():
 def create_scheduler() -> BackgroundScheduler:
     scheduler = BackgroundScheduler()
     scheduler.add_job(refresh_trmnl_ips, "cron", hour=0, minute=1, id="trmnl_ips_refresh")
-    scheduler.add_job(refresh_all, "cron", hour=0, minute=5, id="data_refresh")
+    scheduler.add_job(refresh_all, "interval", hours=1, id="data_refresh")
     return scheduler

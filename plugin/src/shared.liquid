@@ -78,6 +78,6 @@
   <span class="title text-stroke md:portrait:hidden lg:portrait:block">{{ trmnl.plugin_settings.instance_name | default: "AI Leaderboard" }}</span>
   <span class="title text-stroke hidden md:portrait:block lg:portrait:block">{{ _view_label }}</span>
 
-  <span class="instance  text-stroke md:portrait:hidden">{{ _view_label }}</span>
+  <span class="instance  text-stroke md:portrait:hidden">{% if _view_label %}{{ _view_label }} · {% endif %}artificialanalysis.ai</span>
 </div>
 {% endtemplate %}

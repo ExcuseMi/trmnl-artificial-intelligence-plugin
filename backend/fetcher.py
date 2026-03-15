@@ -49,6 +49,11 @@ def fetch_image_to_video() -> dict:
     return _transform_media(raw.get("data", []))
 
 
+def fetch_image_editing() -> dict:
+    raw = _get("/data/media/image-editing")
+    return _transform_media(raw.get("data", []))
+
+
 def fetch_trmnl_ips() -> list[str]:
     logger.info("Fetching TRMNL IPs")
     with httpx.Client(timeout=10) as client:

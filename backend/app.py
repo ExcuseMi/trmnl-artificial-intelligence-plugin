@@ -106,6 +106,12 @@ def get_image_to_video():
     return _snapshot_route("image-to-video", fetcher.fetch_image_to_video)
 
 
+@app.get("/image-editing")
+@require_trmnl_ip
+def get_image_editing():
+    return _snapshot_route("image-editing", fetcher.fetch_image_editing)
+
+
 @app.get("/all")
 @require_trmnl_ip
 def get_all():
@@ -114,7 +120,8 @@ def get_all():
         ("text-to-image",  fetcher.fetch_text_to_image),
         ("text-to-speech", fetcher.fetch_text_to_speech),
         ("text-to-video",  fetcher.fetch_text_to_video),
-        ("image-to-video", fetcher.fetch_image_to_video),
+        ("image-to-video",  fetcher.fetch_image_to_video),
+        ("image-editing",   fetcher.fetch_image_editing),
     ]
     result = {}
     errors = {}

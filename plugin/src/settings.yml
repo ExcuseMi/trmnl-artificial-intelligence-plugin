@@ -19,8 +19,9 @@ custom_fields:
     · <strong>Text to Image</strong> — image generation ELO ratings<br />
     · <strong>Text to Speech</strong> — voice synthesis ELO ratings<br />
     · <strong>Text to Video</strong> — video generation ELO ratings<br />
-    · <strong>Image to Video</strong> — image animation ELO ratings<br /><br />
-    Data refreshed daily.
+    · <strong>Image to Video</strong> — image animation ELO ratings<br />
+    · <strong>Image Editing</strong> — image editing ELO ratings<br /><br />
+    Data refreshed hourly.
   help_text: TRMNL X Ready
   category: analytics
   github_url: https://github.com/ExcuseMi/trmnl-artificial-intelligence-plugin
@@ -36,6 +37,7 @@ custom_fields:
   - Text to Speech: text-to-speech
   - Text to Video: text-to-video
   - Image to Video: image-to-video
+  - Image Editing: image-editing
   multiple: true
 name: AI Leaderboard
-refresh_interval: 1440
+refresh_interval: 60
