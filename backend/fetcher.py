@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 import httpx
 
@@ -13,13 +14,23 @@ def _headers() -> dict:
     return {"x-api-key": os.environ["AA_API_KEY"]}
 
 
-def _get(path: str) -> dict:
+def _get(path: str, retries: int = 3) -> dict:
     url = f"{AA_BASE}{path}"
     logger.info("Fetching %s", url)
+    delay = 10
     with httpx.Client(timeout=30) as client:
-        resp = client.get(url, headers=_headers())
-        resp.raise_for_status()
-    return resp.json()
+        for attempt in range(retries):
+            resp = client.get(url, headers=_headers())
+            if resp.status_code == 429 and attempt < retries - 1:
+                reset = resp.headers.get("X-RateLimit-Reset")
+                wait = max(int(reset) - int(time.time()), delay) if reset else delay
+                logger.warning("429 on %s — retrying in %ds (attempt %d/%d)", url, wait, attempt + 1, retries)
+                time.sleep(wait)
+                delay *= 2
+                continue
+            resp.raise_for_status()
+            return resp.json()
+    resp.raise_for_status()  # final attempt failed
 
 
 # ---------- public fetch functions ----------
