@@ -1,4 +1,5 @@
 import logging
+import time
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -29,6 +30,7 @@ def refresh_all():
             logger.info("%s snapshot saved (%d models)", snapshot_type, data.get("total_models", 0))
         except Exception as e:
             logger.error("Failed to refresh %s: %s", snapshot_type, e)
+        time.sleep(2)
 
 
 def refresh_trmnl_ips():
