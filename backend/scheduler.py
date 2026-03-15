@@ -48,5 +48,5 @@ def refresh_trmnl_ips():
 def create_scheduler() -> BackgroundScheduler:
     scheduler = BackgroundScheduler()
     scheduler.add_job(refresh_trmnl_ips, "cron", hour=0, minute=1, id="trmnl_ips_refresh")
-    scheduler.add_job(refresh_all, "interval", hours=1, id="data_refresh")
+    scheduler.add_job(refresh_all, "cron", hour=0, minute=5, id="data_refresh")
     return scheduler

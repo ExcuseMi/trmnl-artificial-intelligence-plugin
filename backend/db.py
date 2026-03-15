@@ -1,7 +1,7 @@
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 DB_PATH = Path("/data/aa.db")
@@ -39,12 +39,8 @@ def _conn():
 
 # ---------- snapshots ----------
 
-def _snapshot_key(dt: datetime | None = None) -> str:
-    return (dt or datetime.utcnow()).strftime("%Y-%m-%dT%H")
-
-
-def get_snapshot(snapshot_type: str, dt: datetime | None = None) -> dict | None:
-    d = _snapshot_key(dt)
+def get_snapshot(snapshot_type: str, snapshot_date: date | None = None) -> dict | None:
+    d = (snapshot_date or date.today()).isoformat()
     with _conn() as conn:
         row = conn.execute(
             "SELECT data FROM snapshots WHERE date = ? AND type = ?", (d, snapshot_type)
@@ -52,8 +48,8 @@ def get_snapshot(snapshot_type: str, dt: datetime | None = None) -> dict | None:
     return json.loads(row["data"]) if row else None
 
 
-def save_snapshot(snapshot_type: str, data: dict, dt: datetime | None = None):
-    d = _snapshot_key(dt)
+def save_snapshot(snapshot_type: str, data: dict, snapshot_date: date | None = None):
+    d = (snapshot_date or date.today()).isoformat()
     with _conn() as conn:
         conn.execute(
             """INSERT INTO snapshots (date, type, data)
