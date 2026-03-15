@@ -1,6 +1,7 @@
 import fcntl
 import logging
 import os
+import time
 from functools import wraps
 
 from flask import Flask, jsonify, request
@@ -134,7 +135,9 @@ def get_all():
             except Exception as e:
                 logger.error("On-demand fetch failed for %s: %s", snapshot_type, e)
                 errors[snapshot_type] = "unavailable"
+                time.sleep(2)
                 continue
+            time.sleep(2)
         result[snapshot_type] = data
 
     return jsonify({"data": result}), 200
