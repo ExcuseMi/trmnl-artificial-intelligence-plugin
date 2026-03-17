@@ -1,7 +1,6 @@
 import fcntl
 import logging
 import os
-import time
 from functools import wraps
 
 from flask import Flask, jsonify, request
@@ -73,7 +72,7 @@ def _snapshot_route(snapshot_type: str, fetch_fn):
             db.save_snapshot(snapshot_type, data)
         except Exception as e:
             logger.error("On-demand fetch failed for %s: %s", snapshot_type, e)
-            return jsonify({}), 200
+            data = db.get_snapshot_latest(snapshot_type)
     return jsonify({"data": data}), 200
 
 
@@ -125,7 +124,6 @@ def get_all():
         ("image-editing",   fetcher.fetch_image_editing),
     ]
     result = {}
-    errors = {}
     for snapshot_type, fetch_fn in sources:
         data = db.get_snapshot(snapshot_type)
         if data is None:
@@ -134,11 +132,9 @@ def get_all():
                 db.save_snapshot(snapshot_type, data)
             except Exception as e:
                 logger.error("On-demand fetch failed for %s: %s", snapshot_type, e)
-                errors[snapshot_type] = "unavailable"
-                time.sleep(2)
-                continue
-            time.sleep(2)
-        result[snapshot_type] = data
+                data = db.get_snapshot_latest(snapshot_type)
+        if data is not None:
+            result[snapshot_type] = data
 
     return jsonify({"data": result}), 200
 
