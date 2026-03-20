@@ -58,6 +58,16 @@ def get_snapshot_latest(snapshot_type: str) -> dict | None:
     return json.loads(row["data"]) if row else None
 
 
+def get_latest_snapshot(snapshot_type: str) -> dict | None:
+    """Return the most recent snapshot for the given type, regardless of date."""
+    with _conn() as conn:
+        row = conn.execute(
+            "SELECT data FROM snapshots WHERE type = ? ORDER BY date DESC LIMIT 1",
+            (snapshot_type,),
+        ).fetchone()
+    return json.loads(row["data"]) if row else None
+
+
 def save_snapshot(snapshot_type: str, data: dict, snapshot_date: date | None = None):
     d = (snapshot_date or date.today()).isoformat()
     with _conn() as conn:
