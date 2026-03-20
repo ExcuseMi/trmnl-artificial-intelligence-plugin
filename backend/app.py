@@ -68,6 +68,8 @@ def health():
 def _snapshot_route(snapshot_type: str, fetch_fn):
     data = db.get_snapshot(snapshot_type)
     if data is None:
+        data = db.get_latest_snapshot(snapshot_type)
+    if data is None:
         try:
             data = fetch_fn()
             db.save_snapshot(snapshot_type, data)
@@ -128,6 +130,8 @@ def get_all():
     errors = {}
     for snapshot_type, fetch_fn in sources:
         data = db.get_snapshot(snapshot_type)
+        if data is None:
+            data = db.get_latest_snapshot(snapshot_type)
         if data is None:
             try:
                 data = fetch_fn()
