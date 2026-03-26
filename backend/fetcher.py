@@ -9,21 +9,37 @@ AA_BASE = "https://artificialanalysis.ai/api/v2"
 TRMNL_IPS_API = "https://trmnl.com/api/ips"
 
 
-def _headers() -> dict:
-    return {"x-api-key": os.environ["AA_API_KEY"]}
+def _api_keys() -> list[str]:
+    """Return all configured API keys. Supports AA_API_KEYS (comma-separated) or AA_API_KEY."""
+    multi = os.environ.get("AA_API_KEYS", "")
+    if multi:
+        return [k.strip() for k in multi.split(",") if k.strip()]
+    return [os.environ["AA_API_KEY"]]
 
 
 def _get(path: str) -> dict:
     url = f"{AA_BASE}{path}"
     logger.info("Fetching %s", url)
+    keys = _api_keys()
+    last_exc: Exception | None = None
     with httpx.Client(timeout=30) as client:
-        resp = client.get(url, headers=_headers())
-        if resp.status_code == 429:
-            reset = resp.headers.get("X-RateLimit-Reset")
-            logger.warning("429 on %s (rate limited, reset=%s) — using cached data", url, reset)
+        for i, key in enumerate(keys):
+            resp = client.get(url, headers={"x-api-key": key})
+            if resp.status_code == 429:
+                reset = resp.headers.get("X-RateLimit-Reset")
+                logger.warning(
+                    "429 on %s with key %d/%d (rate limited, reset=%s)%s",
+                    url, i + 1, len(keys), reset,
+                    " — trying next key" if i + 1 < len(keys) else " — all keys exhausted",
+                )
+                try:
+                    resp.raise_for_status()
+                except Exception as e:
+                    last_exc = e
+                continue
             resp.raise_for_status()
-        resp.raise_for_status()
-        return resp.json()
+            return resp.json()
+    raise last_exc
 
 
 # ---------- public fetch functions ----------
