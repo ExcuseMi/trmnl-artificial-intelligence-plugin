@@ -103,7 +103,27 @@
                 return '<span class="' + labelClass + '" style="font-weight:' + weight + ';">' + name + '</span>'
                      + '<br/><span class="label" style="font-weight:' + weight + ';">' + (parts[1] || "") + '</span>';
               }
-              var name = this.value.length > maxNameLen ? this.value.substring(0, maxNameLen - 1) + "…" : this.value;
+              var name = this.value;
+              if (name.length > maxNameLen) {
+                var dash = name.indexOf(" - ");
+                var base = dash !== -1 ? name.substring(0, dash) : name;
+
+                var paren = base.indexOf("(");
+                if (paren !== -1) {
+                  var core = base.substring(0, paren).trim();
+                  var qualifier = base.substring(paren + 1).replace(/\)$/, "").split(",")[0].trim();
+                  var withQualifier = qualifier ? core + " (" + qualifier + "…)" : core;
+                  base = withQualifier.length <= maxNameLen ? withQualifier : core;
+                }
+
+                name = base;
+                if (name.length > maxNameLen) {
+                  var truncated = name.substring(0, maxNameLen - 1);
+                  var lastSpace = truncated.lastIndexOf(" ");
+                  if (lastSpace > maxNameLen * 0.6) truncated = truncated.substring(0, lastSpace);
+                  name = truncated + "…";
+                }
+              }
               return '<span class="' + labelClass + '" style="font-weight:' + weight + ';">' + name + '</span>';
             },
           },
