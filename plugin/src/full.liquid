@@ -103,8 +103,8 @@
                 return '<span class="' + labelClass + '" style="font-weight:' + weight + ';">' + name + '</span>'
                      + '<br/><span class="label" style="font-weight:' + weight + ';">' + (parts[1] || "") + '</span>';
               }
-              var name = this.value.length > 26 ? this.value.substring(0, 25) + "…" : this.value;
-              return '<span class="' + labelClass + '" style="font-weight:' + weight + ';">' + name + '</span>';
+              var name = this.value;
+              return '<span data-clamp="2" class="' + labelClass + '" style="font-weight:' + weight + ';">' + name + '</span>';
             },
           },
           lineWidth: 0, tickWidth: 0, gridLineWidth: 0,
@@ -130,7 +130,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
       makeChart("{{ chart_id_md }}", 5,  "label",       false);
-      makeChart("{{ chart_id_lg }}", 10, "value--small", false);
+      makeChart("{{ chart_id_lg }}", 10, "label label--large", false);
     });
   </script>
 </div>
