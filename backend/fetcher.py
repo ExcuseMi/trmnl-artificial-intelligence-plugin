@@ -45,32 +45,32 @@ def _get(path: str) -> dict:
 # ---------- public fetch functions ----------
 
 def fetch_llms() -> dict:
-    raw = _get("/data/llms/models")
+    raw = _get("/language/models/free")
     return _transform_llms(raw.get("data", []))
 
 
 def fetch_text_to_image() -> dict:
-    raw = _get("/data/media/text-to-image")
+    raw = _get("/media/text-to-image/models/free")
     return _transform_media(raw.get("data", []))
 
 
 def fetch_text_to_speech() -> dict:
-    raw = _get("/data/media/text-to-speech")
+    raw = _get("/media/text-to-speech/models/free")
     return _transform_media(raw.get("data", []))
 
 
 def fetch_text_to_video() -> dict:
-    raw = _get("/data/media/text-to-video")
+    raw = _get("/media/text-to-video/models/free")
     return _transform_media(raw.get("data", []))
 
 
 def fetch_image_to_video() -> dict:
-    raw = _get("/data/media/image-to-video")
+    raw = _get("/media/image-to-video/models/free")
     return _transform_media(raw.get("data", []))
 
 
 def fetch_image_editing() -> dict:
-    raw = _get("/data/media/image-editing")
+    raw = _get("/media/image-editing/models/free")
     return _transform_media(raw.get("data", []))
 
 
@@ -94,6 +94,7 @@ def _transform_llms(models: list[dict]) -> dict:
             continue
 
         pricing = m.get("pricing") or {}
+        performance = m.get("performance") or {}
         entry = {
             "name": m.get("name", ""),
             "creator": (m.get("model_creator") or {}).get("name", ""),
@@ -101,9 +102,8 @@ def _transform_llms(models: list[dict]) -> dict:
         }
         for key, val in {
             "coding":       evals.get("artificial_analysis_coding_index"),
-            "math":         evals.get("artificial_analysis_math_index"),
-            "speed_tps":    m.get("median_output_tokens_per_second"),
-            "ttft_s":       m.get("median_time_to_first_token_seconds"),
+            "speed_tps":    performance.get("median_output_tokens_per_second"),
+            "ttft_s":       performance.get("median_time_to_first_token_seconds"),
             "price_input":  pricing.get("price_1m_input_tokens"),
             "price_output": pricing.get("price_1m_output_tokens"),
         }.items():
