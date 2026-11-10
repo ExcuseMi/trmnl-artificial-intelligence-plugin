@@ -85,6 +85,20 @@ def fetch_trmnl_ips() -> list[str]:
 
 # ---------- transformations ----------
 
+def _speed(m: dict) -> tuple:
+    """Output speed and time to first token. performance_v3 (means) replaces the old
+    performance block (medians), which returns no data from 2026-12-10."""
+    v3 = m.get("performance_v3") or {}
+    old = m.get("performance") or {}
+    tps = v3.get("mean_output_tokens_per_second")
+    ttft = v3.get("mean_time_to_first_token_seconds")
+    if tps is None:
+        tps = old.get("median_output_tokens_per_second")
+    if ttft is None:
+        ttft = old.get("median_time_to_first_token_seconds")
+    return tps, ttft
+
+
 def _transform_llms(models: list[dict]) -> dict:
     parsed = []
     for m in models:
@@ -94,7 +108,7 @@ def _transform_llms(models: list[dict]) -> dict:
             continue
 
         pricing = m.get("pricing") or {}
-        performance = m.get("performance") or {}
+        speed_tps, ttft_s = _speed(m)
         entry = {
             "name": m.get("name", ""),
             "creator": (m.get("model_creator") or {}).get("name", ""),
@@ -102,8 +116,8 @@ def _transform_llms(models: list[dict]) -> dict:
         }
         for key, val in {
             "coding":       evals.get("artificial_analysis_coding_index"),
-            "speed_tps":    performance.get("median_output_tokens_per_second"),
-            "ttft_s":       performance.get("median_time_to_first_token_seconds"),
+            "speed_tps":    speed_tps,
+            "ttft_s":       ttft_s,
             "price_input":  pricing.get("price_1m_input_tokens"),
             "price_output": pricing.get("price_1m_output_tokens"),
         }.items():
